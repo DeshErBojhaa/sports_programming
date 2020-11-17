@@ -1,11 +1,8 @@
-from collections import deque, defaultdict
-from math import inf
-from sys import setrecursionlimit
 import sys
+from math import inf, isinf
+from collections import defaultdict, deque
 import os
 from io import BytesIO, IOBase
-from random import shuffle
-
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -48,63 +45,52 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+T = int(input())
 
-# setrecursionlimit(300000)
+def bfs(a, b, name_id, id_name, char_names):
+    q = deque([a])
+    seen_ch = set()
+    dist = defaultdict(lambda: inf)
+    dist[a] = 0
 
+    while q:
+        now = q.popleft()
+        if now == b:
+            return dist[now]
+        cur_name = id_name[now]
+        for ch in cur_name:
+            if ch in seen_ch:
+                continue
+            seen_ch.add(ch)
+            for nxt in char_names[ch]:
+                if dist[nxt] > dist[now] + 1:
+                    q.append(nxt)
+                    dist[nxt] = dist[now] + 1
 
-def accepted(N, arr):
-    levels = [1]
-
-    last_num, node_chunk, height= -inf, 0, 0
-    for i in range(1, N):
-        v = arr[i]
-        if v < last_num:
-            node_chunk += 1
-            if node_chunk == levels[height]:
-                height += 1
-                node_chunk = 0
-
-        if height + 1 >= len(levels):
-            levels.append(0)
-
-        levels[height + 1] += 1
-        last_num = v
-
-    return len(levels) - 1
-
-
-def wrong(N, arr):
-    levels = [1]
-
-    i = 1
-    last_num, node_chunk, level_nodes = -inf, 0, 0
-    while i < N:
-        for j in range(i, N):
-            if arr[j] < last_num:
-                node_chunk += 1
-                last_num = arr[j]
-                if node_chunk >= levels[-1]:
-                    levels.append(level_nodes)
-                    last_num = arr[j]
-                    node_chunk = 0
-                    level_nodes = 1
-                    break
-                level_nodes += 1
-            else:
-                level_nodes += 1
-                last_num = arr[j]
-        i = j + 1
-
-    levels.append(level_nodes)
-    return len(levels) - 1
+    return -1 if isinf(dist[b]) else dist[b]
 
 
-# wrong(8, [1,7,6,8,3,5,4,2])
-arr = list(range(2, 12))
-for i in range(1000):
-    shuffle(arr)
-    n = len(arr) + 1
-    if accepted(n, [1] + arr) == wrong(n, [1] + arr):
-        print('Ok')
-        continue
-    print([1] + arr, accepted(n, [1] + arr), wrong(n, [1] + arr))
+for tt in range(T):
+    N ,Q = map(int, input().split())
+    names = input().split()
+    name_id = {n:i+1 for i, n in enumerate(names)}
+    id_name = {i+1:n for i, n in enumerate(names)}
+
+    dd = defaultdict(set)
+
+    for n in names:
+        nid = name_id[n]
+        for ch in n:
+            dd[ch].add(nid)
+    
+    ans = []
+    for qq in range(Q):
+        a, b = map(int, input().split())
+        ans.append(bfs(a, b, name_id, id_name, dd))
+    
+    for i, v in enumerate(ans):
+        if v > 0:
+            ans[i] += 1
+
+    print(f'Case #{tt+1}: ', end='')
+    print(*ans)

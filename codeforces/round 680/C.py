@@ -1,11 +1,8 @@
-from collections import deque, defaultdict
-from math import inf
-from sys import setrecursionlimit
 import sys
+from collections import Counter
+from math import sqrt, ceil
 import os
 from io import BytesIO, IOBase
-from random import shuffle
-
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -48,63 +45,36 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+T = int(input())
 
-# setrecursionlimit(300000)
-
-
-def accepted(N, arr):
-    levels = [1]
-
-    last_num, node_chunk, height= -inf, 0, 0
-    for i in range(1, N):
-        v = arr[i]
-        if v < last_num:
-            node_chunk += 1
-            if node_chunk == levels[height]:
-                height += 1
-                node_chunk = 0
-
-        if height + 1 >= len(levels):
-            levels.append(0)
-
-        levels[height + 1] += 1
-        last_num = v
-
-    return len(levels) - 1
-
-
-def wrong(N, arr):
-    levels = [1]
-
-    i = 1
-    last_num, node_chunk, level_nodes = -inf, 0, 0
-    while i < N:
-        for j in range(i, N):
-            if arr[j] < last_num:
-                node_chunk += 1
-                last_num = arr[j]
-                if node_chunk >= levels[-1]:
-                    levels.append(level_nodes)
-                    last_num = arr[j]
-                    node_chunk = 0
-                    level_nodes = 1
-                    break
-                level_nodes += 1
-            else:
-                level_nodes += 1
-                last_num = arr[j]
-        i = j + 1
-
-    levels.append(level_nodes)
-    return len(levels) - 1
-
-
-# wrong(8, [1,7,6,8,3,5,4,2])
-arr = list(range(2, 12))
-for i in range(1000):
-    shuffle(arr)
-    n = len(arr) + 1
-    if accepted(n, [1] + arr) == wrong(n, [1] + arr):
-        print('Ok')
+for t in range(T):
+    a, b = map(int, input().split())
+    if a%b:
+        print(a)
         continue
-    print([1] + arr, accepted(n, [1] + arr), wrong(n, [1] + arr))
+    lim = ceil(sqrt(b))
+    b_copy, ans = b, 1
+
+    pc = Counter()
+    i = 2
+    while i * i <=b:
+        if b%i:
+            i += 1
+            continue
+        while b%i == 0:
+            pc[i] += 1
+            b //= i
+        i += 1
+    if b > 1:
+        pc[b] = 1
+
+    for p, cnt in pc.items():
+        if a%p:
+            continue
+        count = 0
+        aa = a
+        while aa%p == 0 and aa%b_copy == 0:
+            count += 1
+            aa //= p
+        ans = max(ans, aa)
+    print(ans)

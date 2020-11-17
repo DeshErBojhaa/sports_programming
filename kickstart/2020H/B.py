@@ -1,11 +1,8 @@
-from collections import deque, defaultdict
-from math import inf
-from sys import setrecursionlimit
 import sys
+from math import inf, isinf
+from collections import defaultdict, deque
 import os
 from io import BytesIO, IOBase
-from random import shuffle
-
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -48,63 +45,39 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-
-# setrecursionlimit(300000)
-
-
-def accepted(N, arr):
-    levels = [1]
-
-    last_num, node_chunk, height= -inf, 0, 0
-    for i in range(1, N):
-        v = arr[i]
-        if v < last_num:
-            node_chunk += 1
-            if node_chunk == levels[height]:
-                height += 1
-                node_chunk = 0
-
-        if height + 1 >= len(levels):
-            levels.append(0)
-
-        levels[height + 1] += 1
-        last_num = v
-
-    return len(levels) - 1
+T = int(input())
+odd, even = [1,3,5,7,9], [0,2,4,6,8]
+digits = []
 
 
-def wrong(N, arr):
-    levels = [1]
-
-    i = 1
-    last_num, node_chunk, level_nodes = -inf, 0, 0
-    while i < N:
-        for j in range(i, N):
-            if arr[j] < last_num:
-                node_chunk += 1
-                last_num = arr[j]
-                if node_chunk >= levels[-1]:
-                    levels.append(level_nodes)
-                    last_num = arr[j]
-                    node_chunk = 0
-                    level_nodes = 1
-                    break
-                level_nodes += 1
-            else:
-                level_nodes += 1
-                last_num = arr[j]
-        i = j + 1
-
-    levels.append(level_nodes)
-    return len(levels) - 1
+def rec(cur, take_all):
+    if cur == len(digits):
+        return 1
+    now = even if cur%2 else odd
+    ans, rem_len = 0, len(digits) - cur
+    for v in now:
+        if not take_all and v > digits[cur]:
+            break
+        if not take_all and v == digits[cur]:
+            ans += rec(cur+1, False)
+        else:
+            ans += 5**(rem_len - 1)
+    return ans
 
 
-# wrong(8, [1,7,6,8,3,5,4,2])
-arr = list(range(2, 12))
-for i in range(1000):
-    shuffle(arr)
-    n = len(arr) + 1
-    if accepted(n, [1] + arr) == wrong(n, [1] + arr):
-        print('Ok')
-        continue
-    print([1] + arr, accepted(n, [1] + arr), wrong(n, [1] + arr))
+def calc(num):
+    global digits
+    digits = list(map(int, str(num)))
+    ans = sum(pow(5, i) for i in range(1, len(digits))) 
+    for v in odd:
+        if v > digits[0]:
+            break
+        ans += rec(1, v < digits[0])
+    return ans
+
+
+for tt in range(T):
+    l, r = map(int, input().split())
+    ans = calc(r) - calc(l-1)
+    print(f'Case #{tt+1}: {ans}')
+

@@ -1,6 +1,9 @@
+
+from math import inf
 import sys
 import os
 from io import BytesIO, IOBase
+from collections import defaultdict
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -43,18 +46,28 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n, k = map(int, input().split())
+    arr = list(map(int, input().split()))
+    for i in range(n):
+        arr[i] -= 1
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    target_idx = -1
+    for i in range(n-1, -1, -1):
+        if arr[i] != i:
+            target_idx = i
+            break
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    probs = 0
+    for i in range(k):
+        idx, p = map(float, input().split())
+        idx = int(idx) - 1
+        if idx >= target_idx:
+            not_sorted = 1.0000 - probs
+            now_sorted = not_sorted * p
+            probs += now_sorted
+    if target_idx < 0:
+        probs = 1.0
+    print("{:.9f}".format(probs))

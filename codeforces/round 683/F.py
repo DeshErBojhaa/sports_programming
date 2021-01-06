@@ -1,4 +1,6 @@
 import sys
+from collections import defaultdict, Counter
+import sys
 import os
 from io import BytesIO, IOBase
 
@@ -43,18 +45,22 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
-
-a, b = input(), input()
-
-dp = [[0] * (m+2) for _ in range(n+2)]
+N = int(input())
+arr = list(map(int, input().split()))
+freq = Counter(arr)
 ans = 0
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
+fix = freq.most_common(1)[0][0]
+
+for other in freq:
+    if other == fix:
+        continue
+    pref, last_pos = [0] * (N+2), {0:0}
+    for i in range(N):
+        now = 1 if arr[i] == other else 0
+        pref[i+1] = pref[i] + (-1 if arr[i] == fix else now)
+        last_pos.setdefault(pref[i+1], i+1)
+
+        ans = max(ans, i+1 - last_pos[pref[i+1]])
+
 print(ans)

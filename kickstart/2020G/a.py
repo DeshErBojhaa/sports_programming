@@ -19,8 +19,6 @@ def do():
         while start and start[0] < k:
             start.popleft()
         ans += len(start)
-    
-    return ans
 
 for tt in range(1, T+1):
     ans = do()

@@ -1,4 +1,5 @@
 import sys
+from itertools import accumulate
 import os
 from io import BytesIO, IOBase
 
@@ -43,18 +44,35 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    r, c = map(int, input().split())
+    arr = [None] * r
+    pref = [[0]*c for _ in range(r)]
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    for i in range(r):
+        arr[i] = input()
+        pref[i] = [1 if arr[i][j] == '*' else 0 for j in range(c)]
+        pref[i] = list(accumulate(pref[i]))
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    ans = 0
+
+    for i in range(r):
+        for j in range(c):
+            if arr[i][j] == '.':
+                continue
+            for cur_row in range(i, r):
+                relative_row = cur_row - i
+                left, right = j - relative_row, j + relative_row
+                # print(f'Left {left}   Right {right}    Relative {relative_row}')
+                if not 0 <= left < c or not 0 <= right < c:
+                    break
+                star_cnt = pref[cur_row][right] - (pref[cur_row][left-1] if left - 1 >= 0 else 0)
+                # print(f' row {cur_row}  Left Right  {left, right}   Cnt {star_cnt}')
+                if star_cnt != (right - left + 1):
+                    break
+                ans += 1
+
+    print(ans)
+    # print()

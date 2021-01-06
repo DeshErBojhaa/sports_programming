@@ -1,6 +1,9 @@
+from functools import lru_cache
+from math import inf
 import sys
 import os
 from io import BytesIO, IOBase
+from collections import defaultdict
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -43,18 +46,40 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n = int(input())
+    
+    @lru_cache(None)
+    def get_val(mask):
+        ans = []
+        for i in range(1, 10):
+            if mask & (1 << i) == 0:
+                ans.append(str(i))
+        ans.sort()
+        st = ''.join(ans)
+        # print(bin(mask), st)
+        return int(st)
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    @lru_cache(None)
+    def rec(rem, mask):
+        # print(f'Rem {rem}     mask {bin(mask)[2:]}')
+        if rem < 0:
+            return inf
+        if rem == 0:
+            return get_val(mask)
+        if mask == 1:
+            return inf
+        
+        ans = inf
+        for i in range(1, 10):
+            if mask & (1<<i) == 0:
+                continue
+            nm = mask ^ (1 << i)
+            ans = min(ans, rec(rem - i, nm))
+        return ans
+
+    ans = rec(n, pow(2, 10) -1)
+    print(ans if ans < inf else -1)

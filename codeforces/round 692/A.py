@@ -1,6 +1,7 @@
 import sys
 import os
 from io import BytesIO, IOBase
+from collections import Counter
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -43,18 +44,21 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n = int(input())
+    s = input()
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    last = 0
+    for i in range(n-1, -1, -1):
+        if s[i] != ')':
+            break
+        last += 1
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    rem = n - last
+
+    if last > rem:
+        print('Yes')
+    else:
+        print('No')

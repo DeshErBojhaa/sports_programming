@@ -1,4 +1,5 @@
 import sys
+from math import ceil
 import os
 from io import BytesIO, IOBase
 
@@ -43,18 +44,17 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    sz, n = map(int, input().split())
+    arr = list(map(int, input().split()))
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    sm = 0
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    idx = (sz * n) - (sz // 2) - 1
+    for i in range(n):
+        sm += arr[idx]
+        idx -= ((sz//2) + 1)
+
+    print(sm)

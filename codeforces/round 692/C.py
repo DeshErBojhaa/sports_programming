@@ -1,6 +1,9 @@
+
+from math import inf
 import sys
 import os
 from io import BytesIO, IOBase
+from collections import defaultdict
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -42,19 +45,47 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+from collections import Counter
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n, k = map(int, input().split())
+    cnt = [0] * (n + 1)
+    out_of_pos = 0
+    positions = Counter()
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    for i in range(k):
+        r, c = map(int, input().split())
+        if r == c:
+            continue
+        cnt[r] += 1
+        cnt[c] += 1
+        out_of_pos += 1
+        positions[r, c] += 1
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    # Case A
+    problem_pair, ans = 0, 0
+    for k in positions:
+        r, c = k
+        if (c, r) in positions:
+            problem_pair += 1
+    
+    problem_pair //= 2
+    if problem_pair:
+        ans += problem_pair * 3
+        ans += out_of_pos - (problem_pair * 2)
+        rem = out_of_pos - (problem_pair * 2)
+        two = sum(cnt[i] == 2 for i in range(1, n+1))
+        ans += (two == rem)
+        print(ans)
+        continue
+
+    # Case B
+    one = sum(cnt[i] == 1 for i in range(1, n+1))
+    if one:
+        print(out_of_pos)
+        continue
+
+    # Case C
+    print(out_of_pos + 1)

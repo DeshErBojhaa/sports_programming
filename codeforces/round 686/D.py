@@ -1,3 +1,4 @@
+from math import sqrt
 import sys
 import os
 from io import BytesIO, IOBase
@@ -43,18 +44,39 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+lim = 100010
+prime = [True] * lim
+prime[0] = prime[1] = False
 
-a, b = input(), input()
+for i in range(2, int(sqrt(lim)) + 2):
+    if not prime[i]:
+        continue
+    for j in range(i * i, lim, i):
+        prime[j] = False
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+primes = []
+for i in range(2, lim):
+    if prime[i]:
+        primes.append(i)
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+
+T = int(input())
+
+for _ in range(T):
+    nn = int(input())
+    main_ans = [1]
+
+    for p in primes:
+        n = nn
+        ans = [1]
+        while n % p == 0 and p % ans[-1] == 0 and (n//p) % p == 0:
+            ans.append(p)
+            n //= p
+    
+        if n > 1:
+            ans.append(n)
+        if len(ans) > len(main_ans):
+            main_ans = ans
+
+    print(len(main_ans) -1)
+    print(*main_ans[1:])

@@ -1,6 +1,9 @@
+
+from math import inf
 import sys
 import os
 from io import BytesIO, IOBase
+from collections import defaultdict
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -43,18 +46,35 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n = int(input())
+    arr = []
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    for _ in range(n):
+        arr.append(list(input()))
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    for sc in range(2, (3*n)):
+        for r in range(0, n):
+            # row barbe, col kombe
+            c = sc - r
+            if not 0 <= c < n:
+                continue
+            for delta in range(3):
+                lc = c - delta
+                if lc < 0 or arr[r][lc] != 'X':
+                    break
+            else:
+                arr[r][c] = 'O'
+                continue
+
+            for delta in range(3):
+                ur = r - delta
+                if ur < 0 or arr[ur][c] != 'X':
+                    break
+            else:
+                arr[r][c] = 'O'
+
+    for v in arr:
+        print(''.join(v))

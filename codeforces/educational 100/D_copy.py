@@ -1,6 +1,10 @@
+from collections import deque, defaultdict
+from math import inf
+from sys import setrecursionlimit
 import sys
 import os
 from io import BytesIO, IOBase
+
 
 #Fast IO Region
 BUFSIZE = 8192
@@ -43,18 +47,30 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for t in range(T):
+    levels = [1]
+    N = int(input())
+    arr = list(map(int, input().split()))
+    i = 1
+    last_num, node_chunk, level_nodes = -inf, 0, 0
+    while i < N:
+        for j in range(i, N):
+            if arr[j] < last_num:
+                node_chunk += 1
+                last_num = arr[j]
+                if node_chunk >= levels[-1]:
+                    levels.append(level_nodes)
+                    last_num = arr[j]
+                    node_chunk = 0
+                    level_nodes = 1
+                    break
+                level_nodes += 1
+            else:
+                level_nodes += 1
+                last_num = arr[j]
+        i = j + 1
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
-
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+    levels.append(level_nodes)
+    print(len(levels) - 1)

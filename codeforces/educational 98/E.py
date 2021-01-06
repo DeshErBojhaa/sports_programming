@@ -1,4 +1,5 @@
 import sys
+import sys
 import os
 from io import BytesIO, IOBase
 
@@ -43,18 +44,38 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+problem, contesttant, seg_len = map(int, input().split())
+arr = []
+for _ in range(contesttant):
+    arr.append(list(map(int, input().split())))
 
-a, b = input(), input()
+arr.sort(key=sum)
 
-dp = [[0] * (m+2) for _ in range(n+2)]
+suffix = [0] * (contesttant + 2)
+
+for seg_start in range(1, problem+1):
+    seg_end = seg_start + seg_len - 1
+    if seg_end > problem:
+        break
+
+    overlap_cnt = 0
+    for i in range(contesttant-1, -1, -1):
+        con_start, con_end = arr[i]
+        overlap_cnt += max(0, (1 + min(seg_end, con_end) - max(seg_start, con_start)) )
+        suffix[i] = max(suffix[i], overlap_cnt)
+
 ans = 0
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
-        else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
+for seg_start in range(1, problem+1):
+    seg_end = seg_start + seg_len - 1
+    if seg_end > problem:
+        break
+
+    overlap_cnt = 0
+    for i in range(contesttant):
+        con_start, con_end = arr[i]
+        overlap_cnt += max(0, (1 + min(seg_end, con_end) - max(seg_start, con_start)) )
+
+        ans = max(ans, overlap_cnt + suffix[i+1])
+
 print(ans)

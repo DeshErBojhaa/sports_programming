@@ -43,18 +43,29 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-n, m = map(int, input().split())
+T = int(input())
 
-a, b = input(), input()
+for _ in range(T):
+    n, k = map(int, input().split())
+    arr = []
 
-dp = [[0] * (m+2) for _ in range(n+2)]
-ans = 0
+    for i in range(n):
+        x, y = map(int, input().split())
+        arr.append((x,y))
 
-for i in range(n-1, -1, -1):
-    for j in range(m-1, -1, -1):
-        if a[i] == b[j]:
-            dp[i][j] = dp[i+1][j+1] + 2
+    ok = False
+
+    for i in range(n):
+        cx, cy = arr[i]
+
+        for j in range(n):
+            if abs(cx - arr[j][0]) + abs(cy - arr[j][1]) > k:
+                break
         else:
-            dp[i][j] = max(0, max(dp[i][j+1], dp[i+1][j]) -1)
-        ans = max(ans, dp[i][j])
-print(ans)
+            ok = True
+            break
+
+    if ok:
+        print(1)
+        continue
+    print(-1)

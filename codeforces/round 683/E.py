@@ -1,4 +1,5 @@
 import sys
+from collections import defaultdict
 import sys
 import os
 from io import BytesIO, IOBase
@@ -45,16 +46,51 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 
-l = [1,2,5,6,8,9,10,14, 19]
+N = int(input())
+arr = list(map(int, input().split()))
+max_val = max(arr)
+max_binary_len = len(bin(max_val)) - 2
 
-for x in l:
-    mv, can = 1000000000, None
-    for y in l:
-        if x == y:
-            continue
-        if x ^ y < mv:
-            mv = x ^ y
-            can = y
-    print(x, can)
+class Node:
+    def __init__(self):
+        self.zero = None
+        self.one = None
+        self.end = False
+
+root = Node()
+
+for v in arr:
+    cur = root
+    ln = max_binary_len - 1
+
+    while ln >= 0:
+        msb = (v & (1<<ln)) > 0
+        if msb:
+            if cur.one is None:
+                cur.one = Node()
+            cur = cur.one
+        else:
+            if cur.zero is None:
+                cur.zero = Node()
+            cur = cur.zero
+        ln -= 1
+    cur.end = 1
 
 
+def rec(cur):
+    if not cur:
+        return 0
+    if cur.end:
+        return cur.end
+
+    left = rec(cur.zero)
+    right = rec(cur.one)
+
+    if left > 1 and right > 1:
+        return 1 + max(left, right)
+    
+    return left + right
+
+
+valid = rec(root)
+print(N - valid)

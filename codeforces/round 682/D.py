@@ -1,3 +1,5 @@
+from functools import reduce
+from operator import xor
 import sys
 import os
 from io import BytesIO, IOBase
@@ -43,3 +45,33 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+N = int(input())
+arr = list(map(int, input().split()))
+
+
+def do(N, arr):
+    if N%2 == 0:
+        if reduce(xor, arr) != 0:
+            return False, []
+    ans = []
+    N -= (N%2 == 0)
+    for i in range(1, N+1, 2):
+        if i + 2 > N:
+            break
+        ans.append([i, i+1, i+2])
+    
+    for i in range(N-2, -1, -2):
+        if i - 2 < 1:
+            break
+        ans.append([i, i-1, i-2])
+
+    return True, ans
+
+ok, ans = do(N, arr)
+if ok:
+    print('YES')
+    print(len(ans))
+    for v in ans:
+        print(*v)
+else:
+    print('NO')

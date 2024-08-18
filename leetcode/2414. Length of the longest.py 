@@ -1,0 +1,18 @@
+class Solution:
+    def longestContinuousSubstring(self, s: str) -> int:
+        ans = 0
+        for j, ch in enumerate(s):
+            tmp = 0
+            for i in range(26):
+                if j + i >= len(s):
+                    break
+                nxt = ord(ch) + i
+                if nxt > ord('z'):
+                    break
+                if s[j+i] == chr(nxt):
+                    tmp += 1
+                else:
+                    break
+            ans = max(ans, tmp)
+        
+        return ans

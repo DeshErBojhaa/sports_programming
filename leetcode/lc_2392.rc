@@ -1,0 +1,78 @@
+use std::collections::HashMap;
+
+pub fn build_matrix(k: i32, rc: Vec<Vec<i32>>, cc: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    let mut g_row: HashMap<i32, Vec<i32>> = HashMap::new();
+    let mut g_col: HashMap<i32, Vec<i32>> = HashMap::new();
+
+    for v in rc {
+        g_row.entry(v[0]).or_insert_with(Vec::new).push(v[1]);
+    }
+
+    for v in cc {
+        g_col.entry(v[0]).or_insert_with(Vec::new).push(v[1]);
+    }
+
+    let mut top_row: Vec<i32> = vec![];
+    let mut flag: Vec<i32> = vec![0; (k + 1) as usize];
+
+    for i in 1..k + 1 {
+        if flag[i as usize] == 0 {
+            let cycle = topo(&g_row, i, &mut flag, &mut top_row);
+            if cycle {
+                return vec![];
+            }
+        }
+    }
+
+    top_row.reverse();
+    let map: HashMap<i32, usize> = top_row.iter().enumerate().map(|(i, &v)| (v, i)).collect();
+
+    let mut top_col: Vec<i32> = vec![];
+    let mut flag: Vec<i32> = vec![0; (k + 1) as usize];
+
+    for i in 1..k + 1 {
+        if flag[i as usize] == 0 {
+            let cycle = topo(&g_col, i, &mut flag, &mut top_col);
+            if cycle {
+                return vec![];
+            }
+        }
+    }
+    top_col.reverse();
+
+    let mut ans: Vec<Vec<i32>> = vec![vec![0; k as usize]; k as usize];
+    for (j, v) in top_col.iter().enumerate() {
+        let i = map[v];
+        ans[i][j] = *v;
+    }
+    ans
+}
+
+fn topo(g: &HashMap<i32, Vec<i32>>, cur: i32, flag: &mut Vec<i32>, ret: &mut Vec<i32>) -> bool {
+    if flag[cur as usize] == 1 {
+        return true;
+    }
+    flag[cur as usize] = 1;
+    let mut cycle = false;
+    for v in g.get(&cur).unwrap_or(&vec![]) {
+        if flag[*v as usize] == 1 {
+            return true;
+        }
+        if flag[*v as usize] == 2 {
+            continue;
+        }
+        cycle |= topo(g, *v, flag, ret);
+    }
+    flag[cur as usize] = 2;
+    ret.push(cur);
+    cycle
+}
+
+fn main() {
+    let ans = build_matrix(
+        3,
+        vec![vec![1, 2], vec![3, 2]],
+        vec![vec![2, 1], vec![3, 2]],
+    );
+    println!("{:?}", ans);
+}

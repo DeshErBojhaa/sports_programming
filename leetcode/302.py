@@ -1,20 +1,24 @@
-from ast import main
-from math import inf
 from typing import List
+from collections import deque
 
 def minArea(image: List[List[str]], x: int, y: int) -> int:
-    l, r, u, d = inf, -1, inf, -1
+    l, r, u, d = y, y, x, x
+    image[x][y] = '0'
+    R, C = len(image), len(image[0])
 
-    for i, row in enumerate(image):
-        for j, c in enumerate(row):
-            if c == '0':
+    q = deque([(x, y)])
+    while q:
+        row, col = q.popleft()
+        l, r = min(l, col), max(r, col)
+        u, d = min(u, row), max(d, row)
+        for nr, nc in [(row, col+1), (row+1, col), (row, col-1), (row-1, col)]:
+            if not 0 <= nr < R or not 0 <= nc < C:
                 continue
-            l = min(l, j)
-            r = max(r, j)
+            if image[nr][nc] == '0':
+                continue
+            image[nr][nc] = '0'
+            q.append((nr, nc))
 
-            u = min(u, i)
-            d = max(d, i)
-    print(l, r, u, d)
     return (r - l + 1) * (d - u + 1)
 
 
